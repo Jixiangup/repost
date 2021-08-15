@@ -1,23 +1,45 @@
 package com.bnyte.repost.autoconfigure.scanner;
 
+import com.bnyte.core.annotation.bind.RepostClient;
+import com.bnyte.core.util.ClassUtils;
 import com.bnyte.repost.autoconfigure.config.RepostProperties;
+import com.bnyte.repost.autoconfigure.proxy.RepostFactoryBean;
+import com.bnyte.repost.autoconfigure.proxy.RepostProxyHandler;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.*;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.TypeFilter;
 
-import java.util.Arrays;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
 
     private RepostProperties repostProperties;
+    private BeanDefinitionRegistry registry;
 
     public RepostClientScanner(BeanDefinitionRegistry registry, RepostProperties repostProperties) {
         super(registry, false);
+        if (this.registry == null) {
+            setRegistry(registry);
+        }
         this.repostProperties = repostProperties;
         registerFilters(repostProperties);
+    }
+
+    public void setRegistry(BeanDefinitionRegistry registry) {
+        this.registry = registry;
     }
 
     /**
@@ -27,9 +49,9 @@ public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
         // 判断用户是否配置需要全局扫描
         if (repostProperties.isAllInterfaces()) {
             addIncludeFilter(new RepostClientIncludeFilter());
-        } else {
-            addExcludeFilter(new RepostClientExcludeFilter());
+            addIncludeFilter(new AnnotationTypeFilter(RepostClient.class));
         }
+        addExcludeFilter(new RepostClientExcludeFilter());
     }
 
 
@@ -40,7 +62,15 @@ public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
      */
     @Override
     public Set<BeanDefinitionHolder> doScan(String... basePackages) {
+        // 扫描完成之后我们获得了所有需要注册的类
         Set<BeanDefinitionHolder> beanDefinitions = super.doScan(basePackages);
+
+        for (BeanDefinitionHolder beanDefinition : beanDefinitions) {
+
+            registerProxy(registry, beanDefinition);
+
+        }
+
         if (beanDefinitions.isEmpty()) {
             logger.warn("[Forest] No Forest client is found in package '" + Arrays.toString(basePackages) + "'.");
         }
@@ -60,11 +90,36 @@ public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
             }
 
             String beanClassName = definition.getBeanClassName();
-            // TODO 获取到类名
+
             logger.info("[Forest] Created Forest Client Bean with name '" + holder.getBeanName()
                     + "' and Proxy of '" + beanClassName + "' client interface");
 
         }
     }
 
+    public void registerProxy(BeanDefinitionRegistry registry, BeanDefinitionHolder beanDefinitionHolder) {
+        String beanName = beanDefinitionHolder.getBeanName();
+        String beanClassName = beanDefinitionHolder.getBeanDefinition().getBeanClassName();
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(beanClassName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
+        AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+        beanDefinition.setBeanClass(RepostFactoryBean.class);
+        beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(clazz);
+        registry.registerBeanDefinition(beanName, beanDefinition);
+    }
+
+
+    /**
+     * 这一行必须添加否则接口会被过滤掉
+     */
+    @Override
+    protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+//        return beanDefinition.getMetadata().isInterface() && beanDefinition.getMetadata().isIndependent();
+        return true;
+    }
 }

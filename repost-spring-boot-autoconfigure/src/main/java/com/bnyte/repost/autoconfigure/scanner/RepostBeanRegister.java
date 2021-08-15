@@ -37,7 +37,6 @@ public class RepostBeanRegister implements ResourceLoaderAware, BeanPostProcesso
         if (CollectionUtils.isEmpty(basePackages)) {
             return scanner;
         }
-
         scanner.doScan(StringUtils.toStringArray(basePackages));
 
         return scanner;

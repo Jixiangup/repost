@@ -1,5 +1,6 @@
 package com.bnyte.repost.autoconfigure.scanner;
 
+import com.bnyte.core.annotation.bind.RepostClient;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
@@ -17,11 +18,14 @@ public class RepostClientIncludeFilter implements TypeFilter {
      */
     @Override
     public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
-        String className = metadataReader.getClassMetadata().getClassName();
+        /*String className = metadataReader.getClassMetadata().getClassName();
         Class<?> clazz = null;
         try {
             clazz = Class.forName(className);
         } catch (ClassNotFoundException ignored) { }
-        return clazz != null;
+        return clazz != null;*/
+        return true;
     }
+
+
 }

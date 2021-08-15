@@ -14,6 +14,12 @@
             <artifactId>repost-spring-boot-autoconfigure</artifactId>
             <version>1.0.0-DEV</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.bnyte.repost</groupId>
+            <artifactId>repost-core</artifactId>
+            <version>1.0.0-DEV</version>
+        </dependency>
     </dependencies>
 
     <properties>

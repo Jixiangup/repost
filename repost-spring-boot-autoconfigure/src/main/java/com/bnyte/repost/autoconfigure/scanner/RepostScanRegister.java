@@ -1,6 +1,7 @@
 package com.bnyte.repost.autoconfigure.scanner;
 
 import com.bnyte.repost.autoconfigure.context.annotation.RepostScan;
+import com.bnyte.repost.autoconfigure.proxy.RepostFactoryBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
