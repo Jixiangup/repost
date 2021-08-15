@@ -36,6 +36,7 @@ public class RepostFactoryBean<T> implements FactoryBean<T>{
                         interfaceType.getClassLoader(),
                         new Class[] {interfaceType},
                         handler);
+        RepostProxyHandler.target = instance;
         return instance;
     }
 

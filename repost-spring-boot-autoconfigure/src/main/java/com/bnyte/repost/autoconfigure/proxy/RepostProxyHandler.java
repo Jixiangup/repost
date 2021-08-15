@@ -1,10 +1,12 @@
 package com.bnyte.repost.autoconfigure.proxy;
 
+import com.bnyte.core.SendRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * @author bnyte
@@ -16,9 +18,10 @@ public class RepostProxyHandler<T> implements InvocationHandler {
     static Logger log = LoggerFactory.getLogger(RepostProxyHandler.class);
 
     private Class<T> interfaceType;
+    public static Object target;
+
 
     public RepostProxyHandler(Class<T> interfaceType) {
-        System.out.println("动态代理构造器被执行了..");
         this.interfaceType = interfaceType;
     }
 
@@ -31,9 +34,20 @@ public class RepostProxyHandler<T> implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Object invoke = method.invoke(this, args);
-        log.info("[Repost] invoke " + method.getName() + " return result is " + invoke);
-        return invoke;
+//        Object invoke = method.invoke(target, args);
+        if (Object.class.equals(method.getDeclaringClass())) {
+            return method.invoke(this, args);
+        } else {
+            StringBuilder url = new StringBuilder("http://localhost:8080/");
+            // 拿参数拼接请求URL
+            log.info("[Repost] invoke " + method.getName() + " return result is " + null + "and args is " + Arrays.toString(args));
+
+            for (Object arg : args) {
+                url.append(arg);
+            }
+            String send = SendRequest.send(url.toString());
+            return send;
+        }
     }
 
 }
