@@ -30,11 +30,10 @@ public class RepostFactoryBean<T> implements FactoryBean<T>{
      */
     @Override
     public T getObject() throws Exception {
-        System.out.println("动态代理被执行...");
         InvocationHandler handler = new RepostProxyHandler<>(interfaceType);
         T instance =
                 (T) Proxy.newProxyInstance(
-                        RepostFactoryBean.class.getClassLoader(),
+                        interfaceType.getClassLoader(),
                         new Class[] {interfaceType},
                         handler);
         return instance;
