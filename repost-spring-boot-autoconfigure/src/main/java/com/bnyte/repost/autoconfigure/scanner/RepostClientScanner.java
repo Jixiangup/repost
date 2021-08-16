@@ -1,27 +1,14 @@
 package com.bnyte.repost.autoconfigure.scanner;
 
-import com.bnyte.core.annotation.bind.RepostClient;
-import com.bnyte.core.util.ClassUtils;
+import com.bnyte.core.bind.annotation.RepostClient;
 import com.bnyte.repost.autoconfigure.config.RepostProperties;
 import com.bnyte.repost.autoconfigure.proxy.RepostFactoryBean;
-import com.bnyte.repost.autoconfigure.proxy.RepostProxyHandler;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.*;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.TypeFilter;
 
-import java.io.IOException;
 import java.util.*;
 
 public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
@@ -72,7 +59,7 @@ public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
         }
 
         if (beanDefinitions.isEmpty()) {
-            logger.warn("[Forest] No Forest client is found in package '" + Arrays.toString(basePackages) + "'.");
+            logger.warn("[Repost] No Forest client is found in package '" + Arrays.toString(basePackages) + "'.");
         }
         processBeanDefinitions(beanDefinitions);
         return beanDefinitions;
@@ -91,7 +78,7 @@ public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
 
             String beanClassName = definition.getBeanClassName();
 
-            logger.info("[Forest] Created Forest Client Bean with name '" + holder.getBeanName()
+            logger.info("[Repost] Created Repost Client Bean with name '" + holder.getBeanName()
                     + "' and Proxy of '" + beanClassName + "' client interface");
 
         }
@@ -119,7 +106,11 @@ public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
      */
     @Override
     protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-//        return beanDefinition.getMetadata().isInterface() && beanDefinition.getMetadata().isIndependent();
-        return true;
+        // 如果为真则会扫描所有，包括类，但是类会抛出异常，也就是动态代理失败
+//        if (repostProperties.isAllInterfaces()) {
+//            return true;
+//        } else {
+        return beanDefinition.getMetadata().isInterface() && beanDefinition.getMetadata().isIndependent();
+//        }
     }
 }

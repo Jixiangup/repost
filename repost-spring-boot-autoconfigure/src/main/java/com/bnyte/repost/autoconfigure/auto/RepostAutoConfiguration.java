@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 
 @EnableConfigurationProperties(RepostProperties.class)
 @Configuration
-@Import({RepostScanRegister.class})
+//@Import({RepostScanRegister.class})
 public class RepostAutoConfiguration {
 
     @Autowired

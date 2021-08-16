@@ -1,4 +1,4 @@
-package com.bnyte.core.annotation.bind;
+package com.bnyte.core.bind.annotation;
 
 import java.lang.annotation.*;
 
