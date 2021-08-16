@@ -1,6 +1,7 @@
 package com.bnyte.repost.autoconfigure.proxy;
 
 import com.bnyte.core.SendRequest;
+import com.bnyte.core.handler.RepostRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,6 @@ public class RepostProxyHandler<T> implements InvocationHandler {
     static Logger log = LoggerFactory.getLogger(RepostProxyHandler.class);
 
     private Class<T> interfaceType;
-    public static Object target;
 
 
     public RepostProxyHandler(Class<T> interfaceType) {
@@ -37,15 +37,8 @@ public class RepostProxyHandler<T> implements InvocationHandler {
         if (Object.class.equals(method.getDeclaringClass())) {
             return method.invoke(this, args);
         } else {
-            StringBuilder url = new StringBuilder("http://localhost:8080/");
-            // 拿参数拼接请求URL
-            log.info("[Repost] invoke " + method.getName() + " return result is " + null + "and args is " + Arrays.toString(args));
-
-            for (Object arg : args) {
-                url.append(arg);
-            }
-            String send = SendRequest.send(url.toString());
-            return send;
+            new RepostRequestHandler(method, interfaceType, args);
+            return null;
         }
     }
 

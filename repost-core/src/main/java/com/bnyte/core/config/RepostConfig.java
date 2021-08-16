@@ -1,9 +1,17 @@
-package com.bnyte.repost.autoconfigure.config;
+package com.bnyte.core.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+/**
+ * @author bnyte
+ * @version 1.0.0
+ * @email bnytezz@163.com
+ * @date 2021-08-17 00:04
+ */
+public class RepostConfig {
 
-@ConfigurationProperties(prefix = "bnyte.repost")
-public class RepostProperties {
+    /**
+     * 保存配置
+     */
+    private static RepostConfig repostConfig;
 
     /**
      * 指定超时时间，默认三千毫秒
@@ -68,5 +76,13 @@ public class RepostProperties {
 
     public void setConnectTimeout(Long connectTimeout) {
         this.connectTimeout = connectTimeout;
+    }
+
+    public static RepostConfig getRepostConfig() {
+        return repostConfig;
+    }
+
+    public static void setRepostConfig(RepostConfig repostConfig) {
+        RepostConfig.repostConfig = repostConfig;
     }
 }
