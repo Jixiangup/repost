@@ -1,6 +1,8 @@
 package com.bnyte.core.handler;
 
-import com.bnyte.core.http.RepostRequest;
+
+import com.bnyte.core.cache.InterfaceCache;
+import com.bnyte.core.context.RepostInterface;
 
 import java.lang.reflect.Method;
 
@@ -13,6 +15,7 @@ public abstract class AbstractRepostRequest {
     public Method method;
     public Class<?> interfaceType;
     public Object[] parameters;
+    public InterfaceCache<String, RepostInterface> interfaceCache;
 
     public AbstractRepostRequest(Method method, Class<?> interfaceType, Object[] parameters) {
         this.method = method;

@@ -23,4 +23,9 @@ public @interface Request {
      */
     RequestMethod[] methods() default {RequestMethod.GET};
 
+    /**
+     * 是否开启缓存
+     */
+    boolean enableCache() default false;
+
 }

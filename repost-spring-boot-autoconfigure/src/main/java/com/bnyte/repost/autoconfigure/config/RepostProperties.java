@@ -30,6 +30,19 @@ public class RepostProperties {
      */
     private String charset = "UTF-8";
 
+    /**
+     * 是否开启缓存，false为不开启，true为开启。默认不开启
+     */
+    private boolean enableCache = false;
+
+    public boolean isEnableCache() {
+        return enableCache;
+    }
+
+    public void setEnableCache(boolean enableCache) {
+        this.enableCache = enableCache;
+    }
+
     public String getCharset() {
         return charset;
     }
