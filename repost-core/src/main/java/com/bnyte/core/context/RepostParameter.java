@@ -1,5 +1,6 @@
 package com.bnyte.core.context;
 
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 
 /**
@@ -9,9 +10,9 @@ import java.util.HashMap;
  */
 public class RepostParameter<T> extends HashMap<String, T> {
 
-    private Object[] parameters;
+    private Parameter[] parameters;
 
-    public RepostParameter(Object[] parameters) {
+    public RepostParameter(Parameter[] parameters) {
         super();
         this.parameters = parameters;
     }
@@ -20,7 +21,12 @@ public class RepostParameter<T> extends HashMap<String, T> {
         return parameters;
     }
 
-    public void setParameters(Object[] parameters) {
+    public void setParameters(Parameter[] parameters) {
         this.parameters = parameters;
+    }
+
+    public static RepostParameter<Object> initRepostParameter (Parameter[] parameters) {
+        RepostParameter<Object> parameter = new RepostParameter<>(parameters);
+        return parameter;
     }
 }

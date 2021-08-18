@@ -24,7 +24,6 @@ public class RepostRequestHandler extends AbstractRepostRequest {
     private RepostMethod repostMethod;
     private RepostParameter<Object> repostParameter;
     private static RepostConfig config = RepostRequestHandler.getConfig();
-    private static InterfaceCache<String, RepostInterface> interfaceCache = RepostRequest.getInterfaceCache();
 
     public RepostRequestHandler(Method method, Class<?> interfaceType, Object[] parameters) {
         super(method, interfaceType, parameters);
@@ -37,17 +36,19 @@ public class RepostRequestHandler extends AbstractRepostRequest {
     public void initRepostRequestBefore() {
         Class<?> interFaceType = getInterFaceType();
         // 初始化当前接口
-        initRepostInterface(interFaceType);
+        RepostInterface repostInterface = initRepostInterface(interFaceType);
     }
 
     // 初始化接口
-    private void initRepostInterface (Class<?> interfaceType) {
+    private RepostInterface initRepostInterface (Class<?> interfaceType) {
         // 当前接口id，这是唯一标识
-        String beanName = ClassUtils.getBeanName(interfaceType);
+        String interfaceId = ClassUtils.getBeanName(interfaceType);
         Request request = interfaceType.getAnnotation(Request.class);
         boolean enableCache = request.enableCache();
+        RepostInterface cache = null;
         // 判断当前接口中是否开启缓存
         if (!enableCache) {
+            // 如果本也没有开启则都配置文件中是否配置了开启
             enableCache = config.isEnableCache();
         }
         /**
@@ -59,23 +60,53 @@ public class RepostRequestHandler extends AbstractRepostRequest {
         if (RepostRequest.getInterfaceCache() == null) {
             // 开启了缓存为RepostRequest的全局缓存开启
             if (enableCache) {
+                // 说明现在是第一次进行接口初始化，所以需要对接口缓存池初始化
                 RepostRequest.setInterfaceCache(new InterfaceCache<>());
             }
         } else {
-            // TODO: 2021/8/17 编写接口缓存池，将接口添加到缓存池当中进去
-            boolean containsKey = RepostRequestHandler.interfaceCache.containsKey(beanName);
-//            if (containsKey)
+            if (enableCache) {
+                // 从缓存获取
+                cache = interfaceCache.get(interfaceId);
+            }
         }
 
+        // 开启缓存的清空
+        if (enableCache) {
+            /*
+                如果开启了缓存优先判断当前接口缓存池中是否为空，如果为空则说明是第一次解析请求对象，所以需要为接口缓存池初始化避免浪费内存
+             */
+            if (RepostRequest.getInterfaceCache() == null) {
+                RepostRequest.setInterfaceCache(new InterfaceCache<>());
+            }
+
+        }
+        // 没有开启缓存
+        else {
+
+        }
+
+        RepostMethod repostMethod = null;
+
+        /*
+            缓存中查到了数据，直接初始化方法不在乎接口上的一些东西
+         */
+        if (cache != null) {
+            repostMethod = RepostMethod.initRequestMethod(this.method, cache);
+        }
         // 当前接口上的所有注解
         Annotation[] annotations = interfaceType.getAnnotations();
+
         // 初始化当前接口执行的方法
-        RepostMethod repostMethod = initRequestMethod(this.method);
+        repostMethod = RepostMethod.initRequestMethod(this.method, cache);
 
-        RepostInterface repostInterface =
-                new RepostInterface(beanName, interfaceType, annotations, repostMethod, enableCache);
+        if (cache == null) {
+            cache =
+                    new RepostInterface(interfaceId, interfaceType, annotations, repostMethod, enableCache);
+        }
 
-        this.repostInterface = repostInterface;
+        this.repostInterface = cache;
+
+        return this.repostInterface;
     }
 
     @Override
@@ -92,24 +123,7 @@ public class RepostRequestHandler extends AbstractRepostRequest {
         return this.interfaceType;
     }
 
-    RepostMethod initRequestMethod(Method method) {
-        String methodId = method.getName();
 
-        Annotation[] annotations = method.getAnnotations();
-
-        RepostParameter<Object> repostParameter = initRepostParameter(parameters);
-
-        RepostMethod currentMethod = new RepostMethod(methodId, annotations, repostParameter);
-        this.repostMethod = currentMethod;
-
-        return currentMethod;
-    }
-
-    public RepostParameter<Object> initRepostParameter (Object[] parameters) {
-        RepostParameter<Object> parameter = new RepostParameter<>(parameters);
-        this.repostParameter = parameter;
-        return parameter;
-    }
 
     public RepostInterface getRepostInterface() {
         return repostInterface;
