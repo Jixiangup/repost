@@ -37,6 +37,7 @@ public class RepostRequestHandler extends AbstractRepostRequest {
         Class<?> interFaceType = getInterFaceType();
         // 初始化当前接口
         RepostInterface repostInterface = initRepostInterface(interFaceType);
+        this.repostInterface = repostInterface;
     }
 
     // 初始化接口
@@ -51,32 +52,22 @@ public class RepostRequestHandler extends AbstractRepostRequest {
             // 如果本也没有开启则都配置文件中是否配置了开启
             enableCache = config.isEnableCache();
         }
-        /**
-         * 如果目前全局RepostRequest对象中的接口池为空那么则说明当前是所有接口第一次被调用，也就是说在这里如果调用接口池的相关方法会发生空指针的bug
-         * 所以此时我们会读出当前类中的注解来判断是否自定义需要开启缓存，如果不需要，那Repost会去全局config拿数据判断是否配置了开启缓存，如果有配置
-         * 那次是就会判断，如果依然没有开启则直接跳过为当前接口缓存初始化减少内存占用
-         * 当然他们的优先级顺序分别是 @Repost(enable=true)其次是配置文件中的bnyte.repost.enable=true
+        /*
+          如果目前全局RepostRequest对象中的接口池为空那么则说明当前是所有接口第一次被调用，也就是说在这里如果调用接口池的相关方法会发生空指针的bug
+          所以此时我们会读出当前类中的注解来判断是否自定义需要开启缓存，如果不需要，那Repost会去全局config拿数据判断是否配置了开启缓存，如果有配置
+          那次是就会判断，如果依然没有开启则直接跳过为当前接口缓存初始化减少内存占用
+          当然他们的优先级顺序分别是 @Repost(enable=true)其次是配置文件中的bnyte.repost.enable=true
          */
-        if (RepostRequest.getInterfaceCache() == null) {
-            // 开启了缓存为RepostRequest的全局缓存开启
-            if (enableCache) {
-                // 说明现在是第一次进行接口初始化，所以需要对接口缓存池初始化
-                RepostRequest.setInterfaceCache(new InterfaceCache<>());
-            }
-        } else {
-            if (enableCache) {
-                // 从缓存获取
-                cache = interfaceCache.get(interfaceId);
-            }
-        }
-
-        // 开启缓存的清空
         if (enableCache) {
             /*
                 如果开启了缓存优先判断当前接口缓存池中是否为空，如果为空则说明是第一次解析请求对象，所以需要为接口缓存池初始化避免浪费内存
              */
             if (RepostRequest.getInterfaceCache() == null) {
                 RepostRequest.setInterfaceCache(new InterfaceCache<>());
+            }
+            else {
+                // 从缓存获取
+                cache = interfaceCache.get(interfaceId);
             }
 
         }

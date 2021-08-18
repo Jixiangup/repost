@@ -1,6 +1,8 @@
 package com.bnyte.core;
 
 import com.alibaba.fastjson.JSON;
+import com.bnyte.core.annotation.RepostAnnotation;
+import com.bnyte.core.annotation.target.RequestAnnotation;
 import com.bnyte.core.bind.annotation.Request;
 import com.bnyte.core.bind.annotation.RequestMethod;
 import com.bnyte.core.cache.InterfaceCache;
@@ -12,9 +14,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @auther bnyte
@@ -54,8 +54,8 @@ public class TestDemo {
             InvocationHandler handler = Proxy.getInvocationHandler(annotation);
             Field declaredFields = handler.getClass().getDeclaredField("memberValues");
             declaredFields.setAccessible(true);
-            LinkedHashMap<String, Object> valueObject = (LinkedHashMap) declaredFields.get(handler);
-            for (String ley : valueObject.keySet()) {
+            LinkedHashMap valueObject = (LinkedHashMap) declaredFields.get(handler);
+            for (Object ley : valueObject.keySet()) {
                 System.out.println(ley);
             }
             Object value = valueObject.get("value");
@@ -73,5 +73,18 @@ public class TestDemo {
 
         }
         System.out.println(result);
+    }
+
+    @Test
+    public void test03 () throws Exception {
+        RepostAnnotation<Request> requestAnnotation = new RequestAnnotation<>();
+        Map<String, Object> map = requestAnnotation.forMap(this, Request.class);
+        Object methods = requestAnnotation.getValue(this, Request.class, "1");
+        System.out.println(methods == null);
+    }
+
+    @Test
+    public void test04 () throws Exception {
+        System.out.println(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 }
