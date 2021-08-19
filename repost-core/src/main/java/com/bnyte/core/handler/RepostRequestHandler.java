@@ -11,7 +11,6 @@ import com.bnyte.core.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.net.URL;
 
 /**
  * @auther bnyte
@@ -36,69 +35,11 @@ public class RepostRequestHandler extends AbstractRepostRequest {
     public void initRepostRequestBefore() {
         Class<?> interFaceType = getInterFaceType();
         // 初始化当前接口
-        RepostInterface repostInterface = initRepostInterface(interFaceType);
+        RepostInterface repostInterface = RepostInterface.initRepostInterface(interFaceType, this.method, this.parameters);
         this.repostInterface = repostInterface;
     }
 
-    // 初始化接口
-    private RepostInterface initRepostInterface (Class<?> interfaceType) {
-        // 当前接口id，这是唯一标识
-        String interfaceId = ClassUtils.getBeanName(interfaceType);
-        Request request = interfaceType.getAnnotation(Request.class);
-        boolean enableCache = request.enableCache();
-        RepostInterface cache = null;
-        // 判断当前接口中是否开启缓存
-        if (!enableCache) {
-            // 如果本也没有开启则都配置文件中是否配置了开启
-            enableCache = config.isEnableCache();
-        }
-        /*
-          如果目前全局RepostRequest对象中的接口池为空那么则说明当前是所有接口第一次被调用，也就是说在这里如果调用接口池的相关方法会发生空指针的bug
-          所以此时我们会读出当前类中的注解来判断是否自定义需要开启缓存，如果不需要，那Repost会去全局config拿数据判断是否配置了开启缓存，如果有配置
-          那次是就会判断，如果依然没有开启则直接跳过为当前接口缓存初始化减少内存占用
-          当然他们的优先级顺序分别是 @Repost(enable=true)其次是配置文件中的bnyte.repost.enable=true
-         */
-        if (enableCache) {
-            /*
-                如果开启了缓存优先判断当前接口缓存池中是否为空，如果为空则说明是第一次解析请求对象，所以需要为接口缓存池初始化避免浪费内存
-             */
-            if (RepostRequest.getInterfaceCache() == null) {
-                RepostRequest.setInterfaceCache(new InterfaceCache<>());
-            }
-            else {
-                // 从缓存获取
-                cache = interfaceCache.get(interfaceId);
-            }
 
-        }
-        // 没有开启缓存
-        else {
-
-        }
-
-        RepostMethod repostMethod = null;
-
-        /*
-            缓存中查到了数据，直接初始化方法不在乎接口上的一些东西
-         */
-        if (cache != null) {
-            repostMethod = RepostMethod.initRequestMethod(this.method, cache);
-        }
-        // 当前接口上的所有注解
-        Annotation[] annotations = interfaceType.getAnnotations();
-
-        // 初始化当前接口执行的方法
-        repostMethod = RepostMethod.initRequestMethod(this.method, cache);
-
-        if (cache == null) {
-            cache =
-                    new RepostInterface(interfaceId, interfaceType, annotations, repostMethod, enableCache);
-        }
-
-        this.repostInterface = cache;
-
-        return this.repostInterface;
-    }
 
     @Override
     public void init() {
@@ -149,7 +90,7 @@ public class RepostRequestHandler extends AbstractRepostRequest {
      * @return true说明添加成功，false说明添加失败
      */
     public void addInterfaceToCache(String interfaceId, RepostInterface repostInterface) {
-        InterfaceCache<String, RepostInterface> cache = RepostRequest.getInterfaceCache();
+        InterfaceCache<String, RepostInterface> cache = InterfaceCache.getInterfaceCache();
         // 判断当前接口缓存池中是否为空，如果为空则说明当前接口一定
         if (cache.isEmpty()) {
             // 为空直接将当前接口添加进去

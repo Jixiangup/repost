@@ -9,13 +9,5 @@ import com.bnyte.core.cache.InterfaceCache;
  */
 public class RepostRequest {
 
-    public static InterfaceCache<String, RepostInterface> interfaceCache;
 
-    public static InterfaceCache<String, RepostInterface> getInterfaceCache() {
-        return interfaceCache;
-    }
-
-    public static void setInterfaceCache(InterfaceCache<String, RepostInterface> interfaceCache) {
-        RepostRequest.interfaceCache = interfaceCache;
-    }
 }

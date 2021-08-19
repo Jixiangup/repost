@@ -1,5 +1,7 @@
 package com.bnyte.core.cache;
 
+import com.bnyte.core.context.RepostInterface;
+import com.bnyte.core.context.RepostRequest;
 import com.bnyte.core.exception.RepostRuntimeException;
 import com.bnyte.core.util.StringUtils;
 
@@ -11,6 +13,16 @@ import java.util.HashMap;
  * @email bnytezz@163.com
  */
 public class InterfaceCache<K, V> extends HashMap<K, V> {
+
+    public static InterfaceCache<String, RepostInterface> interfaceCache;
+
+    public static InterfaceCache<String, RepostInterface> getInterfaceCache() {
+        return interfaceCache;
+    }
+
+    public static void setInterfaceCache(InterfaceCache<String, RepostInterface> interfaceCache) {
+        InterfaceCache.interfaceCache = interfaceCache;
+    }
 
     private String interfaceId; // 通过接口ID查询当前接口是否包含在缓存当中
 

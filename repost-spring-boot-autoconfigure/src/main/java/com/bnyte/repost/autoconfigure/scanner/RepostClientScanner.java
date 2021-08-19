@@ -96,7 +96,9 @@ public class RepostClientScanner extends ClassPathBeanDefinitionScanner {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
         beanDefinition.setBeanClass(RepostFactoryBean.class);
+        // 使用RepostFactoryBean类的构造器进行实例化
         beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(clazz);
+        // 将对象注入到IOC容器当中
         registry.registerBeanDefinition(beanName, beanDefinition);
     }
 

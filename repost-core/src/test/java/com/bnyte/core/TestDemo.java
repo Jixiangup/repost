@@ -2,7 +2,7 @@ package com.bnyte.core;
 
 import com.alibaba.fastjson.JSON;
 import com.bnyte.core.annotation.RepostAnnotation;
-import com.bnyte.core.annotation.target.RequestAnnotation;
+import com.bnyte.core.annotation.abst.extend.RequestAnnotation;
 import com.bnyte.core.bind.annotation.Request;
 import com.bnyte.core.bind.annotation.RequestMethod;
 import com.bnyte.core.cache.InterfaceCache;
