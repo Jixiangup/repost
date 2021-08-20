@@ -1,7 +1,6 @@
 package com.bnyte.core.cache;
 
 import com.bnyte.core.context.RepostInterface;
-import com.bnyte.core.context.RepostRequest;
 import com.bnyte.core.exception.RepostRuntimeException;
 import com.bnyte.core.util.StringUtils;
 

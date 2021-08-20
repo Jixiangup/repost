@@ -1,6 +1,5 @@
 package com.bnyte.core.annotation;
 
-import java.lang.annotation.Annotation;
 import java.util.Map;
 
 /**
