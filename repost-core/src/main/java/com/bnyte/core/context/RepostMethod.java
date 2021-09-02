@@ -1,12 +1,9 @@
 package com.bnyte.core.context;
 
-import com.bnyte.core.bind.annotation.RequestMethod;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author bnyte
@@ -24,10 +21,11 @@ public class RepostMethod<T, V> extends HashMap<T, V> {
     private boolean enableCache;
     private String url;
 
-    public RepostMethod(T methodId, Annotation[] annotations, RepostParameter<Object> repostParameter) {
+    public RepostMethod(T methodId, Annotation[] annotations, RepostParameter<Object> repostParameter, V method) {
         this.methodId = methodId;
         this.annotations = annotations;
         this.repostParameter = repostParameter;
+        this.put(methodId, method);
     }
 
     public String getUri() {
@@ -70,26 +68,21 @@ public class RepostMethod<T, V> extends HashMap<T, V> {
         this.repostParameter = repostParameter;
     }
 
-    public static RepostMethod<String, Method> initRequestMethod(Method method, RepostInterface repostInterface) {
+    /**
+     * 初始化接口方法类
+     * @param method 当前执行的方法
+     * @return
+     */
+    public static RepostMethod<String, Method> initRequestMethod (Method method, Object[] parameters) {
         String methodId = method.getName();
 
-        Parameter[] parameters = method.getParameters();
-
-        RepostMethod<String, Method> currentMethod = null;
-        // 查看缓存是否包含，如果已经包含则直接返回
-        if (repostInterface != null && repostInterface.getMethodCount() > 0) {
-            currentMethod = repostInterface.getRepostMethod();
-
-            if (currentMethod.isEnableCache()) {
-
-            }
-        }
+        RepostMethod<String, Method> currentMethod;
 
         Annotation[] annotations = method.getAnnotations();
 
-        RepostParameter<Object> repostParameter = RepostParameter.initRepostParameter(parameters);
+        RepostParameter<Object> repostParameter = RepostParameter.initRepostParameter(methodId, Arrays.asList(parameters));
 
-        currentMethod = new RepostMethod<>(methodId, annotations, repostParameter);
+        currentMethod = new RepostMethod<>(methodId, annotations, repostParameter, method);
 
         return currentMethod;
     }

@@ -37,8 +37,9 @@ public class RepostProxyHandler<T> implements InvocationHandler {
         if (Object.class.equals(method.getDeclaringClass())) {
             return method.invoke(this, args);
         } else {
-            new RepostRequestHandler(method, interfaceType, args);
-            return null;
+            // 初始化请求
+            RepostRequestHandler handler = new RepostRequestHandler(method, interfaceType, args);
+            return handler;
         }
     }
 
