@@ -1,9 +1,10 @@
 package com.bnyte.core.context;
 
-import com.bnyte.core.bind.annotation.Request;
+import com.bnyte.core.bind.annotation.ProxyCache;
 import com.bnyte.core.cache.InterfaceCache;
 import com.bnyte.core.config.RepostConfig;
 import com.bnyte.core.util.ClassUtils;
+import com.bnyte.core.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -24,14 +25,14 @@ public class RepostInterface {
     private String interfaceId;
     private Class<?> interfaceType;
     private Annotation[] annotations;
-    private RepostMethod repostMethod;
+    private RepostMethod<String, Method> repostMethod;
     private int methodCount;
     private boolean enableCache;
 
     public RepostInterface() {
     }
 
-    public RepostInterface(String interfaceId, Class<?> interfaceType, Annotation[] annotations, RepostMethod repostMethod, boolean enableCache) {
+    public RepostInterface(String interfaceId, Class<?> interfaceType, Annotation[] annotations, RepostMethod<String, Method> repostMethod, boolean enableCache) {
         this.interfaceId = interfaceId;
         this.interfaceType = interfaceType;
         this.annotations = annotations;
@@ -39,13 +40,28 @@ public class RepostInterface {
         this.enableCache = enableCache;
     }
 
-    // 初始化接口
+    /**
+     * 初始化接口
+     * @param interfaceType 当前接口字节码对象
+     * @param method 当前接口执行的方法
+     * @param parameters 当前方法的请求参数
+     * @return 返回Repost封装的接口对象
+     */
     public static RepostInterface initRepostInterface (Class<?> interfaceType, Method method, Object[] parameters) {
-        // 当前接口id，这是唯一标识
-        String interfaceId = ClassUtils.getBeanName(interfaceType);
-        Request request = interfaceType.getAnnotation(Request.class);
-        boolean enableCache = request.enableCache();
+        // 当前初始化好之后的接口
         RepostInterface cache = null;
+        // 当前执行的接口
+        RepostMethod<String, Method> repostMethod = null;
+        ProxyCache proxyCache = interfaceType.getAnnotation(ProxyCache.class);
+        // 当前接口id，这是唯一标识，用于储存在缓存中的key，会通过注解获取是否指定，如果没有指定则说明当前缓存为空
+        String interfaceId = proxyCache.id();
+        // 当前接口上的所有注解
+        Annotation[] annotations = interfaceType.getAnnotations();
+        if (!StringUtils.hasText(interfaceId)) {
+            interfaceId = ClassUtils.getBeanName(interfaceType);
+        }
+        // 判断当前是否开启缓存
+        boolean enableCache = proxyCache.enableCache();
         // 判断当前接口中是否开启缓存
         if (!enableCache) {
             // 如果本也没有开启则都配置文件中是否配置了开启
@@ -68,26 +84,23 @@ public class RepostInterface {
                 // 从缓存获取
                 cache = InterfaceCache.getInterfaceCache().get(interfaceId);
             }
-
         }
         // 没有开启缓存
         else {
-
+            // 直接注册请求
         }
-
-        RepostMethod repostMethod = null;
 
         /*
-            缓存中查到了数据，直接初始化方法不在乎接口上的一些东西
+            缓存中查到了数据，去当前接口中拿缓存的方法
          */
         if (cache != null) {
+//            repostMethod = RepostMethod.initRequestMethod(method, cache);
+            repostMethod = InterfaceCache.getInterfaceCache().get(interfaceId).getRepostMethod();
+        } else {
+            // 初始化当前接口执行的方法
             repostMethod = RepostMethod.initRequestMethod(method, cache);
         }
-        // 当前接口上的所有注解
-        Annotation[] annotations = interfaceType.getAnnotations();
 
-        // 初始化当前接口执行的方法
-        repostMethod = RepostMethod.initRequestMethod(method, cache);
 
         if (cache == null) {
             cache =
@@ -131,11 +144,11 @@ public class RepostInterface {
         this.annotations = annotations;
     }
 
-    public RepostMethod getRepostMethod() {
-        return repostMethod;
+    public RepostMethod<String, Method> getRepostMethod() {
+        return this.repostMethod;
     }
 
-    public void setRepostMethod(RepostMethod repostMethod) {
+    public void setRepostMethod(RepostMethod<String, Method> repostMethod) {
         this.repostMethod = repostMethod;
     }
 

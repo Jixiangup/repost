@@ -85,6 +85,6 @@ public class TestDemo {
 
     @Test
     public void test04 () throws Exception {
-        System.out.println(TimeZone.getTimeZone("Asia/Shanghai"));
+
     }
 }

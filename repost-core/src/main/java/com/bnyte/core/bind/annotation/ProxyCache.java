@@ -1,5 +1,7 @@
 package com.bnyte.core.bind.annotation;
 
+import java.lang.annotation.*;
+
 /**
  * <p>
  *     代理缓存，在接口的代理对象被完成初始化之前，会通过判断当前注解中是否包含了当前的代理缓存，
@@ -10,6 +12,10 @@ package com.bnyte.core.bind.annotation;
  * @date 2021-08-19 18:00
  * @email bnytezz@163.com
  */
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target(value = {ElementType.METHOD, ElementType.TYPE})
+@Documented
 public @interface ProxyCache {
     /**
      * 注解默认值，是否需要开启缓存，默认会以当前注解为准，如：全局配置类配置了开启缓存，但是动态代理对象被当前注解标识了不需要缓存

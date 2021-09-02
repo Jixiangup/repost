@@ -1,6 +1,7 @@
 package com.bnyte.core.cache;
 
 import com.bnyte.core.context.RepostInterface;
+import com.bnyte.core.context.RepostRequest;
 import com.bnyte.core.exception.RepostRuntimeException;
 import com.bnyte.core.util.StringUtils;
 
@@ -28,6 +29,7 @@ public class InterfaceCache<K, V> extends HashMap<K, V> {
     public InterfaceCache() {
         super();
     }
+
 
     /**
      * 如果能够get到说明一定在接口池里边，换句话说，在接口池一定就是开启了接口池，所以这里不在多做判断

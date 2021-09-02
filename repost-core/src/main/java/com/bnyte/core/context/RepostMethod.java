@@ -14,17 +14,17 @@ import java.util.Map;
  * @email bnytezz@163.com
  * @date 2021-08-17 00:41
  */
-public class RepostMethod<K, V> extends HashMap<K, V> {
+public class RepostMethod<T, V> extends HashMap<T, V> {
 
     private String uri; // 当前请求资源
-    private String methodId;
+    private T methodId;
     private int parameterCount;
     private Annotation[] annotations;
     private RepostParameter<Object> repostParameter;
     private boolean enableCache;
     private String url;
 
-    public RepostMethod(String methodId, Annotation[] annotations, RepostParameter<Object> repostParameter) {
+    public RepostMethod(T methodId, Annotation[] annotations, RepostParameter<Object> repostParameter) {
         this.methodId = methodId;
         this.annotations = annotations;
         this.repostParameter = repostParameter;
@@ -54,11 +54,11 @@ public class RepostMethod<K, V> extends HashMap<K, V> {
         this.annotations = annotations;
     }
 
-    public String getMethodId() {
+    public T getMethodId() {
         return methodId;
     }
 
-    public void setMethodId(String methodId) {
+    public void setMethodId(T methodId) {
         this.methodId = methodId;
     }
 
@@ -70,12 +70,12 @@ public class RepostMethod<K, V> extends HashMap<K, V> {
         this.repostParameter = repostParameter;
     }
 
-    public static RepostMethod initRequestMethod(Method method, RepostInterface repostInterface) {
+    public static RepostMethod<String, Method> initRequestMethod(Method method, RepostInterface repostInterface) {
         String methodId = method.getName();
 
         Parameter[] parameters = method.getParameters();
 
-        RepostMethod currentMethod = null;
+        RepostMethod<String, Method> currentMethod = null;
         // 查看缓存是否包含，如果已经包含则直接返回
         if (repostInterface != null && repostInterface.getMethodCount() > 0) {
             currentMethod = repostInterface.getRepostMethod();
@@ -89,7 +89,7 @@ public class RepostMethod<K, V> extends HashMap<K, V> {
 
         RepostParameter<Object> repostParameter = RepostParameter.initRepostParameter(parameters);
 
-        currentMethod = new RepostMethod(methodId, annotations, repostParameter);
+        currentMethod = new RepostMethod<>(methodId, annotations, repostParameter);
 
         return currentMethod;
     }
