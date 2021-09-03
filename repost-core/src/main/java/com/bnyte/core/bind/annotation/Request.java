@@ -1,5 +1,7 @@
 package com.bnyte.core.bind.annotation;
 
+import com.bnyte.core.bind.enums.RequestMethod;
+
 import java.lang.annotation.*;
 
 @Inherited

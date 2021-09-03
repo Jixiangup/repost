@@ -3,35 +3,28 @@ package com.bnyte.core.handler;
 import com.bnyte.core.cache.InterfaceCache;
 import com.bnyte.core.config.RepostConfig;
 import com.bnyte.core.context.RepostInterface;
-import com.bnyte.core.context.RepostMethod;
-import com.bnyte.core.context.RepostParameter;
-
-import java.lang.reflect.Method;
 
 /**
  * @auther bnyte
  * @date 2021-08-16 18:18
  * @email bnytezz@163.com
  */
-public class RepostRequestHandler extends AbstractRepostRequest {
+public class RepostRequestHandler<M, P> extends AbstractRepostRequest<M, P> {
 
-    private RepostInterface repostInterface;
-    private RepostMethod repostMethod;
-    private RepostParameter<Object> repostParameter;
+    private RepostInterface<M, P> repostInterface;
     private static RepostConfig config = RepostRequestHandler.getConfig();
 
-    public RepostRequestHandler(Method method, Class<?> interfaceType, Object[] parameters) {
+    // TODO: 2021/9/3 重构Method写死不使用泛型，直接使用Method因为后续需要用到
+    public RepostRequestHandler(M method, Class<?> interfaceType, P parameters) {
         super(method, interfaceType, parameters);
         // 初始化当前请求之前，初始化三大对象 接口 方法 属性
-        initRepostRequestBefore();
-
+        initBefore();
     }
 
     @Override
-    public void initRepostRequestBefore() {
-        Class<?> interFaceType = getInterFaceType();
+    public void initBefore() {
         // 初始化当前接口
-        RepostInterface repostInterface = RepostInterface.initRepostInterface(interFaceType, this.method, this.parameters);
+        RepostInterface<M, P> repostInterface = new RepostInterface<>(this.interfaceType, this.method, this.parameters);
         this.repostInterface = repostInterface;
     }
 
@@ -59,22 +52,6 @@ public class RepostRequestHandler extends AbstractRepostRequest {
 
     public void setRepostInterface(RepostInterface repostInterface) {
         this.repostInterface = repostInterface;
-    }
-
-    public RepostMethod getRepostMethod() {
-        return repostMethod;
-    }
-
-    public void setRepostMethod(RepostMethod repostMethod) {
-        this.repostMethod = repostMethod;
-    }
-
-    public RepostParameter<Object> getRepostParameter() {
-        return repostParameter;
-    }
-
-    public void setRepostParameter(RepostParameter<Object> repostParameter) {
-        this.repostParameter = repostParameter;
     }
 
     public static RepostConfig getConfig() {

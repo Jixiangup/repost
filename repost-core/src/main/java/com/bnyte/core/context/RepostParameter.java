@@ -13,6 +13,11 @@ public class RepostParameter<T> extends HashMap<String, T> {
 
     private Parameter[] parameters;
 
+    /**
+     * 保存请求参数key为方法ID，value为参数值
+     * @param methodId 方法ID
+     * @param parameters 请求参数
+     */
     public RepostParameter(String methodId, T parameters) {
         super();
         this.put(methodId, parameters);
@@ -32,8 +37,4 @@ public class RepostParameter<T> extends HashMap<String, T> {
         this.parameters = parameters;
     }
 
-    public RepostParameter<Object> initRepostParameter (String methodId, T parameters) {
-        RepostParameter<T> repostParameter = new RepostParameter<>(methodId, parameters);
-        return repostParameter;
-    }
 }

@@ -1,7 +1,7 @@
 package com.bnyte.core.annotation.abst.extend;
 
 import com.bnyte.core.annotation.abst.AbstractRepostAnnotation;
-import com.bnyte.core.bind.annotation.RequestMethod;
+import com.bnyte.core.bind.enums.RequestMethod;
 
 import java.util.LinkedList;
 import java.util.List;

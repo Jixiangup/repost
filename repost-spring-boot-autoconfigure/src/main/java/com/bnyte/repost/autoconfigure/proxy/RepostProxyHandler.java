@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author bnyte
@@ -38,7 +39,7 @@ public class RepostProxyHandler<T> implements InvocationHandler {
             return method.invoke(this, args);
         } else {
             // 初始化请求
-            RepostRequestHandler handler = new RepostRequestHandler(method, interfaceType, args);
+            RepostRequestHandler<Method, List<Object>> handler = new RepostRequestHandler<>(method, interfaceType, Arrays.asList(args));
             return handler;
         }
     }

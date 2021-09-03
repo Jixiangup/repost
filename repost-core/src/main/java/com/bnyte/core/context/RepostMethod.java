@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author bnyte
@@ -11,20 +12,18 @@ import java.util.HashMap;
  * @email bnytezz@163.com
  * @date 2021-08-17 00:41
  */
-public class RepostMethod<T, V> extends HashMap<T, V> {
+public class RepostMethod<K, P> extends HashMap<K, Method> {
 
     private String uri; // 当前请求资源
-    private T methodId;
+    private K methodId;
     private int parameterCount;
     private Annotation[] annotations;
-    private RepostParameter<Object> repostParameter;
+    private RepostParameter<P> repostParameter;
     private boolean enableCache;
     private String url;
 
-    public RepostMethod(T methodId, Annotation[] annotations, RepostParameter<Object> repostParameter, V method) {
-        this.methodId = methodId;
-        this.annotations = annotations;
-        this.repostParameter = repostParameter;
+    public RepostMethod(Method method, K methodId, P parameters) {
+        init(method, methodId, parameters);
         this.put(methodId, method);
     }
 
@@ -52,20 +51,25 @@ public class RepostMethod<T, V> extends HashMap<T, V> {
         this.annotations = annotations;
     }
 
-    public T getMethodId() {
+    public K getMethodId() {
         return methodId;
     }
 
-    public void setMethodId(T methodId) {
+    public void setMethodId(K methodId) {
         this.methodId = methodId;
     }
 
-    public RepostParameter<Object> getRepostParameter() {
+    public RepostParameter<P> getRepostParameter() {
         return repostParameter;
     }
 
-    public void setRepostParameter(RepostParameter<Object> repostParameter) {
+    public void setRepostParameter(RepostParameter<P> repostParameter) {
         this.repostParameter = repostParameter;
+    }
+
+    protected void initBefore(Method method) {
+        String methodId = method.getName();
+
     }
 
     /**
@@ -73,14 +77,14 @@ public class RepostMethod<T, V> extends HashMap<T, V> {
      * @param method 当前执行的方法
      * @return
      */
-    public static RepostMethod<String, Method> initRequestMethod (Method method, Object[] parameters) {
-        String methodId = method.getName();
+    protected void init(Method method, K methodId, P parameters) {
+        this.methodId = methodId;
 
-        RepostMethod<String, Method> currentMethod;
+        RepostMethod<String, List<Object>> currentMethod;
 
         Annotation[] annotations = method.getAnnotations();
 
-        RepostParameter<Object> repostParameter = RepostParameter.initRepostParameter(methodId, Arrays.asList(parameters));
+        RepostParameter<List<Object>> repostParameter = new RepostParameter<>(methodId, Arrays.asList(parameters));
 
         currentMethod = new RepostMethod<>(methodId, annotations, repostParameter, method);
 

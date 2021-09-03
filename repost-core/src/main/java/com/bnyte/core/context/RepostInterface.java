@@ -1,15 +1,12 @@
 package com.bnyte.core.context;
 
-import com.bnyte.core.bind.annotation.ProxyCache;
-import com.bnyte.core.cache.InterfaceCache;
 import com.bnyte.core.config.RepostConfig;
-import com.bnyte.core.support.ProxyCacheSup;
-import com.bnyte.core.util.ClassUtils;
-import com.bnyte.core.util.StringUtils;
+import com.bnyte.core.util.ProxyCacheUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author bnyte
@@ -17,7 +14,7 @@ import java.util.HashMap;
  * @email bnytezz@163.com
  * @date 2021-08-17 00:39
  */
-public class RepostInterface {
+public class RepostInterface<M, P> {
 
     /**
      * RepostConfig全局配置
@@ -27,19 +24,17 @@ public class RepostInterface {
     private String interfaceId;
     private Class<?> interfaceType;
     private Annotation[] annotations;
-    private RepostMethod<String, Method> repostMethod;
-    private int methodCount;
+    private RepostMethod<Method, P> repostMethod;
+    // 包含了父类方法
+    private Long methodCount;
     private boolean enableCache;
 
     public RepostInterface() {
+
     }
 
-    public RepostInterface(String interfaceId, Class<?> interfaceType, Annotation[] annotations, RepostMethod<String, Method> repostMethod, boolean enableCache) {
-        this.interfaceId = interfaceId;
-        this.interfaceType = interfaceType;
-        this.annotations = annotations;
-        this.repostMethod = repostMethod;
-        this.enableCache = enableCache;
+    public RepostInterface(Class<?> interfaceType, M method, P parameters) {
+        init(interfaceType, method, parameters);
     }
 
     /**
@@ -47,79 +42,25 @@ public class RepostInterface {
      * @param interfaceType 当前接口字节码对象
      * @param method 当前接口执行的方法
      * @param parameters 当前方法的请求参数
-     * @return 返回Repost封装的接口对象
      */
-    public static RepostInterface initRepostInterface (Class<?> interfaceType, Method method, Object[] parameters) {
-        // 接口缓存
-        RepostInterface cache = null;
-        // 当前执行的接口方法
-        RepostMethod<String, Method> repostMethod = null;
-        // 获取传入的源接口是否有 ProxyCache 这个注解
-        ProxyCache proxyCache = interfaceType.getAnnotation(ProxyCache.class);
-        if (proxyCache == null) {
-            proxyCache = ProxyCacheSup.class.getAnnotation(ProxyCache.class);
-        }
-        // 当前接口id，这是唯一标识，用于储存在缓存中的key，会通过注解获取是否指定，如果没有指定则说明当前缓存为空
-        String interfaceId = proxyCache.id();
-        // 当前接口上的所有注解
-        Annotation[] annotations = interfaceType.getAnnotations();
-        if (!StringUtils.hasText(interfaceId)) {
-            interfaceId = ClassUtils.getBeanName(interfaceType);
-        }
-        // 判断当前是否开启缓存
-        boolean enableCache = proxyCache.enableCache();
-        // 判断当前接口中是否开启缓存
-        if (!enableCache) {
-            // 如果本也没有开启则都配置文件中是否配置了开启
-            enableCache = repostConfig.isEnableCache();
-        }
-        /*
-          如果目前全局RepostRequest对象中的接口池为空那么则说明当前是所有接口第一次被调用，也就是说在这里如果调用接口池的相关方法会发生空指针的bug
-          所以此时我们会读出当前类中的注解来判断是否自定义需要开启缓存，如果不需要，那Repost会去全局config拿数据判断是否配置了开启缓存，如果有配置
-          那次是就会判断，如果依然没有开启则直接跳过为当前接口缓存初始化减少内存占用
-          当然他们的优先级顺序分别是 @Repost(enable=true)其次是配置文件中的bnyte.repost.enable=true
-         */
-        if (enableCache) {
-            /*
-                如果开启了缓存优先判断当前接口缓存池中是否为空，如果为空则说明是第一次解析请求对象，所以需要为接口缓存池初始化避免浪费内存
-             */
-            if (InterfaceCache.getInterfaceCache() == null) {
-                InterfaceCache.setInterfaceCache(new InterfaceCache<>());
-            }
-            else {
-                // 从缓存获取
-                cache = InterfaceCache.getInterfaceCache().get(interfaceId);
-            }
-        }
-        // 没有开启缓存
-        else {
-            // 直接注册请求
-        }
+    public void init(Class<?> interfaceType, M method, P parameters) {
+        // 为类的属性赋值
+        initProperty(interfaceType, method, parameters);
+    }
 
-        /*
-            缓存中查到了数据，去当前接口中拿缓存的方法
-         */
-        if (cache != null) {
-//            repostMethod = RepostMethod.initRequestMethod(method, cache);
-            repostMethod = InterfaceCache.getInterfaceCache().get(interfaceId).getRepostMethod();
-        } else {
-            // 初始化当前接口执行的方法
-            repostMethod = RepostMethod.initRequestMethod(method, parameters);
-        }
-
-
-        // 获取的缓存对象为空，去注册缓存对象
-        if (cache == null) {
-            cache =
-                    new RepostInterface(interfaceId, interfaceType, annotations, repostMethod, enableCache);
-        }
-
-        if (enableCache) {
-            // 添加接口到缓存池中
-            InterfaceCache.getInterfaceCache().put(interfaceId, cache);
-        }
-
-        return cache;
+    /**
+     * 为当前接口类中的成员变量初始化
+     * @param interfaceType 当前接口类型
+     * @param method 当前请求执行的方法
+     * @param parameters 请求参数
+     */
+    protected void initProperty(Class<?> interfaceType, M method, P parameters) {
+        this.interfaceId = ProxyCacheUtils.getInterfaceId(interfaceType);
+        this.interfaceType = interfaceType;
+        this.annotations = interfaceType.getAnnotations();
+        this.setMethodCount(interfaceType.getMethods());
+        this.enableCache = ProxyCacheUtils.isEnableInterfaceCache(interfaceType);
+        this.repostMethod = new RepostMethod<>(method, parameters);
     }
 
     public boolean isEnableCache() {
@@ -154,19 +95,22 @@ public class RepostInterface {
         this.annotations = annotations;
     }
 
-    public RepostMethod<String, Method> getRepostMethod() {
+    public RepostMethod<String, List<Object>> getRepostMethod() {
         return this.repostMethod;
     }
 
-    public void setRepostMethod(RepostMethod<String, Method> repostMethod) {
+    public void setRepostMethod(RepostMethod<String, List<Object>> repostMethod) {
         this.repostMethod = repostMethod;
     }
 
-    public int getMethodCount() {
+    public Long getMethodCount() {
         return methodCount;
     }
 
-    public void setMethodCount(int methodCount) {
-        this.methodCount = methodCount;
+    public void setMethodCount(Method[] methods) {
+        long count = Arrays.stream(methods)
+                .filter(method -> !Object.class.equals(method.getDeclaringClass()))
+                .count();
+        this.methodCount = count;
     }
 }

@@ -1,4 +1,4 @@
-package com.bnyte.core.bind.annotation;
+package com.bnyte.core.bind.enums;
 
 public enum RequestMethod {
     GET,

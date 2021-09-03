@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
  * @date 2021-09-02 14:08
  * @email bnytezz@163.com
  */
-public class CacheUtils {
+public class ProxyCacheUtils {
 
     private static RepostConfig config = RepostConfig.getRepostConfig();
 
@@ -50,4 +50,40 @@ public class CacheUtils {
         }
         return isEnableCache;
     }
+
+    /**
+     * 通过类的字节码对象获取到当前类的ProxyCache注解对象，如果为空没有添加则会
+     * 去拿ProxyCache的支持类，ProxyCacheSup类上的注解对象。
+     * @param interfaceClass 接口类型
+     * @return 返回ProxyCache的实例对象
+     */
+    public static ProxyCache getProxyCache (Class<?> interfaceClass) {
+        ProxyCache proxyCache = null;
+        if (interfaceClass == null) {
+            return ProxyCacheSup.class.getAnnotation(ProxyCache.class);
+        }
+
+        proxyCache = interfaceClass.getAnnotation(ProxyCache.class);
+
+        if (proxyCache == null) {
+            return ProxyCacheSup.class.getAnnotation(ProxyCache.class);
+        }
+
+        return proxyCache;
+    }
+
+    /**
+     * 通过接口获取当前的接口id, 此方法会优先判断是否打开了ProxyCache注解，
+     * 然后拿他注解中的interfaceId通过interfaceId，如StringUtils.hasText(id)果interfaceId为空则会拿默认的接口类名，首字母小写的原则作为接口ID
+     * @param interfaceType 接口
+     * @return 接口ID
+     */
+    public static String getInterfaceId (Class<?> interfaceType) {
+        ProxyCache proxyCache = getProxyCache(interfaceType);
+        String id = proxyCache.id();
+        id = StringUtils.hasText(id) ? id : ClassUtils.getBeanName(interfaceType);
+        return id;
+    }
+
+
 }
