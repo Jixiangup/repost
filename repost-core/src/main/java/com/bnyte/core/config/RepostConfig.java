@@ -1,5 +1,7 @@
 package com.bnyte.core.config;
 
+import com.bnyte.core.cache.RepostCache;
+
 /**
  * @author bnyte
  * @version 1.0.0
@@ -12,6 +14,11 @@ public class RepostConfig {
      * 保存配置
      */
     private static RepostConfig repostConfig;
+
+    /**
+     * 缓存对象
+     */
+    private RepostCache interfaceCache = new RepostCache();
 
     /**
      * 指定超时时间，默认三千毫秒
@@ -100,5 +107,13 @@ public class RepostConfig {
 
     public static void setRepostConfig(RepostConfig repostConfig) {
         RepostConfig.repostConfig = repostConfig;
+    }
+
+    public RepostCache getInterfaceCache() {
+        return interfaceCache;
+    }
+
+    public void setInterfaceCache(RepostCache interfaceCache) {
+        this.interfaceCache = interfaceCache;
     }
 }

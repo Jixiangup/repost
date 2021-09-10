@@ -1,7 +1,6 @@
 package com.bnyte.core.cache;
 
-import com.bnyte.core.context.RepostInterface;
-import com.bnyte.core.context.RepostRequest;
+import com.bnyte.core.app.RepostInterface;
 import com.bnyte.core.exception.RepostRuntimeException;
 import com.bnyte.core.util.StringUtils;
 
@@ -12,21 +11,9 @@ import java.util.HashMap;
  * @date 2021-08-17 13:16
  * @email bnytezz@163.com
  */
-public class InterfaceCache<K, V> extends HashMap<K, V> {
+public class RepostCache extends HashMap<String, RepostInterface> {
 
-    public static InterfaceCache<String, RepostInterface> interfaceCache;
-
-    public static InterfaceCache<String, RepostInterface> getInterfaceCache() {
-        return interfaceCache;
-    }
-
-    public static void setInterfaceCache(InterfaceCache<String, RepostInterface> interfaceCache) {
-        InterfaceCache.interfaceCache = interfaceCache;
-    }
-
-    private String interfaceId; // 通过接口ID查询当前接口是否包含在缓存当中
-
-    public InterfaceCache() {
+    public RepostCache() {
         super();
     }
 
@@ -36,7 +23,7 @@ public class InterfaceCache<K, V> extends HashMap<K, V> {
      * @param interfaceId 接口ID
      * @return 返回接口对象
      */
-    public V get(String interfaceId) {
+    public RepostInterface get(String interfaceId) {
         if (!StringUtils.hasText(interfaceId)) {
             throw new RepostRuntimeException("interface id cannot be empty, please check the incoming [interfaceId]");
         }
@@ -44,13 +31,12 @@ public class InterfaceCache<K, V> extends HashMap<K, V> {
     }
 
     @Override
-    public V get(Object key) {
+    public RepostInterface get(Object key) {
         return super.get(key);
     }
 
     @Override
-    public V put(K key, V value) {
-
+    public RepostInterface put(String key, RepostInterface value) {
         return super.put(key, value);
     }
 }

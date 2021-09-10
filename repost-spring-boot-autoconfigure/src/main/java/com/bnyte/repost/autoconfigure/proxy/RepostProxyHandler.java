@@ -1,14 +1,13 @@
 package com.bnyte.repost.autoconfigure.proxy;
 
-import com.bnyte.core.SendRequest;
-import com.bnyte.core.handler.RepostRequestHandler;
+import com.bnyte.core.config.RepostConfig;
+import com.bnyte.core.entrance.ApplicationEntrance;
+import com.bnyte.core.entrance.Entrance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author bnyte
@@ -18,6 +17,8 @@ import java.util.List;
 public class RepostProxyHandler<T> implements InvocationHandler {
 
     static Logger log = LoggerFactory.getLogger(RepostProxyHandler.class);
+
+    private RepostConfig repostConfig = RepostConfig.getRepostConfig();
 
     private Class<T> interfaceType;
 
@@ -38,9 +39,11 @@ public class RepostProxyHandler<T> implements InvocationHandler {
         if (Object.class.equals(method.getDeclaringClass())) {
             return method.invoke(this, args);
         } else {
-            // 初始化请求
-            RepostRequestHandler<Method, List<Object>> handler = new RepostRequestHandler<>(method, interfaceType, Arrays.asList(args));
-            return handler;
+            Entrance entrance = new ApplicationEntrance();
+            entrance.initialize();
+            entrance.interceptor();
+            entrance.execute();
+            return "proxy object execute target method...but now author framework writing is not completed";
         }
     }
 

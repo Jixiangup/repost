@@ -73,6 +73,27 @@ public class ProxyCacheUtils {
     }
 
     /**
+     * 通过类的字节码对象获取到当前类的ProxyCache注解对象，如果为空没有添加则会
+     * 去拿ProxyCache的支持类，ProxyCacheSup类上的注解对象。
+     * @param mataMethod 方法类型
+     * @return 返回ProxyCache的实例对象
+     */
+    public static ProxyCache getProxyCache (Method mataMethod) {
+        ProxyCache proxyCache = null;
+        if (mataMethod.getAnnotation(ProxyCache.class) == null) {
+            return ProxyCacheSup.class.getAnnotation(ProxyCache.class);
+        }
+
+        proxyCache = mataMethod.getAnnotation(ProxyCache.class);
+
+        if (proxyCache == null) {
+            return ProxyCacheSup.class.getAnnotation(ProxyCache.class);
+        }
+
+        return proxyCache;
+    }
+
+    /**
      * 通过接口获取当前的接口id, 此方法会优先判断是否打开了ProxyCache注解，
      * 然后拿他注解中的interfaceId通过interfaceId，如StringUtils.hasText(id)果interfaceId为空则会拿默认的接口类名，首字母小写的原则作为接口ID
      * @param interfaceType 接口
@@ -82,6 +103,19 @@ public class ProxyCacheUtils {
         ProxyCache proxyCache = getProxyCache(interfaceType);
         String id = proxyCache.id();
         id = StringUtils.hasText(id) ? id : ClassUtils.getBeanName(interfaceType);
+        return id;
+    }
+
+    /**
+     * 通过接口获取当前的方法id, 此方法会优先判断是否打开了ProxyCache注解，
+     * 然后拿他注解中的id，如StringUtils.hasText(id)果Id为空则会拿默认的方法名
+     * @param method 方法
+     * @return 接口ID
+     */
+    public static String getMethodId (Method method) {
+        ProxyCache proxyCache = getProxyCache(method);
+        String id = proxyCache.id();
+        id = StringUtils.hasText(id) ? id : method.getName();
         return id;
     }
 
